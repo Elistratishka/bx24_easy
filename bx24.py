@@ -9,12 +9,14 @@ load_dotenv()
 
 
 def check_holidays():
+    """Функция проверяет будет ли через 3 дня выходной день"""
     check_date = datetime.date.today() + datetime.timedelta(days=3)
     holidays = requests.get(f'https://isdayoff.ru/{check_date.strftime("%Y%m%d")}?cc=ru').json()
     return check_date, holidays
 
 
 def add_task(check_date):
+    """Функция получает дату и создает на её основе задачу в системе битрикс24"""
     bx24 = Bitrix24(os.getenv('WEBHOOK'))
     bx24.callMethod(
                  'tasks.task.add',
@@ -29,7 +31,7 @@ def add_task(check_date):
 def main_loop():
     while True:
         check_date, holidays = check_holidays()
-        if holidays:
+        if not holidays:
             add_task(check_date)
         time.sleep(86400)
 
